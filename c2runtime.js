@@ -22646,16 +22646,56 @@ cr.behaviors.Pin = function(runtime)
 	};
 	behaviorProto.exps = new Exps();
 }());
+;
+;
+cr.behaviors.destroy = function(runtime)
+{
+	this.runtime = runtime;
+};
+(function ()
+{
+	var behaviorProto = cr.behaviors.destroy.prototype;
+	behaviorProto.Type = function(behavior, objtype)
+	{
+		this.behavior = behavior;
+		this.objtype = objtype;
+		this.runtime = behavior.runtime;
+	};
+	var behtypeProto = behaviorProto.Type.prototype;
+	behtypeProto.onCreate = function()
+	{
+	};
+	behaviorProto.Instance = function(type, inst)
+	{
+		this.type = type;
+		this.behavior = type.behavior;
+		this.inst = inst;				// associated object instance to modify
+		this.runtime = type.runtime;
+	};
+	var behinstProto = behaviorProto.Instance.prototype;
+	behinstProto.onCreate = function()
+	{
+	};
+	behinstProto.tick = function ()
+	{
+		this.inst.update_bbox();
+		var bbox = this.inst.bbox;
+		var layout = this.inst.layer.layout;
+		if (bbox.right < 0 || bbox.bottom < 0 || bbox.left > layout.width || bbox.top > layout.height)
+			this.runtime.DestroyInstance(this.inst);
+	};
+}());
 cr.getObjectRefTable = function () { return [
 	cr.plugins_.c2canvas,
 	cr.plugins_.Button,
 	cr.plugins_.Keyboard,
 	cr.plugins_.Mouse,
-	cr.plugins_.Touch,
 	cr.plugins_.TextBox,
-	cr.plugins_.Sprite,
+	cr.plugins_.Touch,
 	cr.plugins_.Text,
+	cr.plugins_.Sprite,
 	cr.behaviors.DragnDrop,
+	cr.behaviors.destroy,
 	cr.behaviors.Pin,
 	cr.behaviors.Physics,
 	cr.system_object.prototype.cnds.OnLayoutStart,
